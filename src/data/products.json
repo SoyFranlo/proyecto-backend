@@ -1,0 +1,21 @@
+[
+  {
+    "title": "Producto Actualizado",
+    "description": "Descripción Actualizada",
+    "price": 15.99,
+    "thumbnail": "imagen2.jpg",
+    "code": "P002",
+    "stock": 60,
+    "id": "1"
+  },
+  {
+    "id": "3",
+    "title": "Mergio",
+    "description": "Sassa",
+    "code": "osdfns8fhs0",
+    "price": "454632",
+    "stock": "23",
+    "category": "politician",
+    "status": true
+  }
+]
