@@ -16,6 +16,7 @@
     "price": "454632",
     "stock": "23",
     "category": "politician",
+    "quantity": 1,
     "status": true
   }
 ]
