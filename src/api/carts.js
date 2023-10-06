@@ -9,6 +9,49 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
+// Helper function to generate a new cart ID
+async function generateCartId() {
+  const counterFilePath = path.join(__dirname, "./cartCounter.json");
+  try {
+    let counter = { value: 1 };
+    try {
+      const counterData = await fs.readFile(counterFilePath, "utf8");
+      counter = JSON.parse(counterData);
+    } catch (error) {
+      console.error("Error reading counter file", error);
+    }
+    counter.value++;
+    await fs.writeFile(counterFilePath, JSON.stringify(counter, null, 2));
+    return String(counter.value);
+  } catch (error) {
+    console.error("Error generating cart ID:", error);
+    throw new Error("Error generating cart ID");
+  }
+}
+
+// Helper function to read cart data from cart.json
+async function readCartsData() {
+  const cartsFilePath = path.join(__dirname, "../data/carts.json");
+  try {
+    const data = await fs.readFile(cartsFilePath, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Error reading carts data:",error);
+    throw new Error("Error retrieving carts");
+  }
+}
+
+// Helper function to write cart data to cart.json
+async function writeCartsData(carts) {
+  const cartsFilePath = path.join(__dirname, "../data/carts.json");
+  try {
+    await fs.writeFile(cartsFilePath, JSON.stringify(carts, null, 2));
+  } catch (error) {
+    console.error("Error writing carts data:", error);
+    throw new Error("Error updating carts");
+  }
+}
+
 // Route to create a new cart
 cartsRouter.post("/", async (req, res) => {
   try {
@@ -23,6 +66,7 @@ cartsRouter.post("/", async (req, res) => {
 
     res.json(newCart); // Respond with the newly created cart
   } catch (error) {
+    console.error("Error creating a new cart:",error);
     res.status(500).json({ error: "Error creating a new cart" });
   }
 });
@@ -49,6 +93,11 @@ cartsRouter.post("/:cid/product/:pid", async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = parseInt(req.body.quantity, 10);
+  
+  if (isNaN(quantity) || quantity < 1) {
+    res.status(400).json({ error: "Invalid quantity" });
+    return;
+  }
 
   try {
     const carts = await readCartsData(); // Read existing carts data
@@ -79,48 +128,5 @@ cartsRouter.post("/:cid/product/:pid", async (req, res) => {
     res.status(500).json({ error: "Error adding a product to the cart" });
   }
 });
-
-// Helper function to read cart data from cart.json
-async function readCartsData() {
-  const cartsFilePath = path.join(__dirname, "../data/carts.json");
-  try {
-    const data = await fs.readFile(cartsFilePath, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    // If the file doesn't exist or there's an error reading it, return an empty array
-    return [];
-  }
-}
-
-// Helper function to write cart data to cart.json
-async function writeCartsData(carts) {
-  const cartsFilePath = path.join(__dirname, "../data/carts.json");
-  try {
-    await fs.writeFile(cartsFilePath, JSON.stringify(carts, null, 2));
-  } catch (error) {
-    console.error("Error writing carts data:", error);
-    throw new Error("Error updating carts");
-  }
-}
-
-// Helper function to generate a new cart ID
-async function generateCartId() {
-  const counterFilePath = path.join(__dirname, "cartCounter.json");
-  try {
-    let counter = { value: 1 };
-    try {
-      const counterData = await fs.readFile(counterFilePath, "utf8");
-      counter = JSON.parse(counterData);
-    } catch (error) {
-      // Ignore errors, the counter will start at 1 if the file doesn't exist
-    }
-    counter.value++;
-    await fs.writeFile(counterFilePath, JSON.stringify(counter, null, 2));
-    return String(counter.value);
-  } catch (error) {
-    console.error("Error generating cart ID:", error);
-    throw new Error("Error generating cart ID");
-  }
-}
 
 export default cartsRouter;

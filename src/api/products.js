@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 // Configure Multer to handle image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './uploads'); // Directory where images will be saved
+    cb(null, '../uploads'); // Directory where images will be saved
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname); // Original filename
@@ -48,7 +48,7 @@ async function writeProductsData(products) {
 
 // Generate a new product ID based on a persistent counter
 async function generateProductId() {
-  const counterFilePath = path.join(__dirname, 'productCounter.json');
+  const counterFilePath = path.join(__dirname, './productCounter.json');
   try {
     let counter = { value: 1 };
     try {
@@ -68,9 +68,16 @@ async function generateProductId() {
 
 // Get all products
 productsRouter.get('/', async (req, res) => {
+  const limit = parseInt(req.query.limit);
   try {
     const products = await readProductsData();
+    
+   if (!isNaN(limit) && limit > 0) {
+    const limitedProducts = products.slice(0, limit);
+    res.json(limitedProducts);
+   }else{
     res.json(products);
+   }
   } catch (error) {
     res.status(500).json({ error: 'Error retrieving products' });
   }
@@ -102,10 +109,18 @@ productsRouter.post('/', upload.single('thumbnail'), async (req, res) => {
     stock,
     category,
     thumbnails,
+    quantity,
   } = req.body;
 
-  if (!title || !description || !code || !price || !stock || !category) {
+  if (!title || !description || !code || !price || !stock || !category || !quantity) {
     return res.status(400).json({ error: 'All fields are required' });
+  }
+  const products = await readProductsData();
+
+  const existingProduct = products.find((p) => p.code === code);
+
+  if (existingProduct) {
+    return res.status(400).json({ error: 'Product code must be unique' });
   }
 
   const newProduct = {
@@ -113,15 +128,16 @@ productsRouter.post('/', upload.single('thumbnail'), async (req, res) => {
     title,
     description,
     code,
-    price,
-    stock,
+    price: parseFloat(price),
+    stock: parseInt(stock, 10),
     category,
     thumbnails,
     status: true,
+    quantity: parseInt(quantity, 10),
   };
 
   try {
-    const products = await readProductsData();
+    
     products.push(newProduct);
     await writeProductsData(products);
     res.json(newProduct);
@@ -142,6 +158,7 @@ productsRouter.put('/:pid', async (req, res) => {
     if (productIndex === -1) {
       res.status(404).json({ error: 'Product not found' });
     } else {
+      delete updatedProductData.id;
       products[productIndex] = { ...products[productIndex], ...updatedProductData };
       await writeProductsData(products);
       res.json(products[productIndex]);
