@@ -1,11 +1,11 @@
-{{!< layout/main}}
-{{#content "body"}}
-<h2>Live Products</h2>
+
+<h2>Products</h2>
 <ul>
-    {{#each products}}
+    {{#each productList}}
     <li>
         <h2>{{ this.title }}</h2>
-    <p>{{ this.description }}</p>
+    <p>{{ this.description }}</p>h
+    <p>Image: {{this.thumbnail}}</p>
     <p>Code: {{ this.code }}</p>
     <p>Price: ${{ this.price }}</p>
     <p>Stock: {{ this.stock }}</p>
@@ -13,4 +13,4 @@
     </li>
     {{/each}}
 </ul>
-    {{/content}}
+
