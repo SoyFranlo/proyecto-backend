@@ -2,13 +2,10 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'fs/promises';
 import path from 'path';
+import __dirname from '../utils.js';
 
 const productsRouter = express.Router();
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-
-const __dirname = path.dirname(__filename);
 
 
 // Configure Multer to handle image uploads

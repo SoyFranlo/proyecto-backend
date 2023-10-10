@@ -1,13 +1,9 @@
 import express from "express";
 import fs from "fs/promises";
 import path from "path";
+import __dirname from "../utils.js";
 
 const cartsRouter = express.Router();
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-
-const __dirname = path.dirname(__filename);
 
 // Helper function to generate a new cart ID
 async function generateCartId() {
